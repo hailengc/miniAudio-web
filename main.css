@@ -60,3 +60,7 @@
   background-color: blue;
   cursor: pointer;
 }
+
+.progress-panel {
+  cursor: pointer;
+}

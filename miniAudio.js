@@ -7,6 +7,7 @@ var MiniAudio = (function() {
     this.brick = this.elemRoot.querySelector(".progress-bar .brick");
     this.elemAudio.loop = options && options.loop === true;
     window.ha = this.elemAudio;
+    this.showCurrentTime = false;
     this.init();
   }
 
@@ -60,8 +61,9 @@ var MiniAudio = (function() {
           this.bar.offsetWidth - this.brick.offsetWidth
         );
 
-        this.updateProgressTimeText(
-          _getTimeFromProgressOffset.call(this, brickOffset)
+        this.updateTimeText(
+          _getTimeFromProgressOffset.call(this, brickOffset),
+          "currentTime"
         );
         this.brick.style.left = Math.round(brickOffset) + "px";
       }
@@ -105,7 +107,7 @@ var MiniAudio = (function() {
     }
   }
 
-  function _toCurrentTimeString(duration) {
+  function _toTimeString(duration) {
     let minutes,
       seconds = 0;
     seconds = Math.floor(duration);
@@ -119,9 +121,12 @@ var MiniAudio = (function() {
     return ms.join(":");
   }
 
-  function _updateProgressTime(progressTime) {
-    const progressSpan = this.elemRoot.querySelector(".progress-panel span");
-    progressSpan.textContent = progressTime;
+  function _updateTime(timeText, timeType) {
+    const span =
+      timeType === "currentTime"
+        ? this.elemRoot.querySelector(".progress-panel .current-time")
+        : this.elemRoot.querySelector(".progress-panel .duration-time");
+    span.textContent = timeText;
   }
 
   MA.prototype.init = function() {
@@ -139,12 +144,24 @@ var MiniAudio = (function() {
       this.volumeDown.bind(this)
     );
 
-    this.elemAudio.addEventListener("canplay", () => {}, false);
+    _addClickListener.call(
+      this,
+      ".progress-panel",
+      this.toggleTimeText.bind(this)
+    );
+
+    this.elemAudio.addEventListener(
+      "canplay",
+      () => {
+        this.updateTimeText(this.elemAudio.duration, "durationTime");
+      },
+      false
+    );
 
     this.elemAudio.addEventListener(
       "timeupdate",
       () => {
-        this.updateProgressTimeText(this.elemAudio.currentTime);
+        this.updateTimeText(this.elemAudio.currentTime, "currentTime");
 
         const offsetLeft =
           (this.elemAudio.currentTime / this.elemAudio.duration) *
@@ -166,8 +183,25 @@ var MiniAudio = (function() {
     _setBarEventHandler.call(this);
   };
 
-  MA.prototype.updateProgressTimeText = function(time) {
-    _updateProgressTime.call(this, _toCurrentTimeString(time));
+  MA.prototype.updateTimeText = function(time, timeType) {
+    _updateTime.call(this, _toTimeString(time), timeType);
+  };
+
+  MA.prototype.toggleTimeText = function() {
+    const currentTime = this.elemRoot.querySelector(
+      ".progress-panel .current-time"
+    );
+    const durationTime = this.elemRoot.querySelector(
+      ".progress-panel .duration-time"
+    );
+    this.showCurrentTime = !this.showCurrentTime;
+    if (this.showCurrentTime) {
+      currentTime.style.display = "inherit";
+      durationTime.style.display = "none";
+    } else {
+      currentTime.style.display = "none";
+      durationTime.style.display = "inherit";
+    }
   };
 
   MA.prototype.toggleLoop = function() {
