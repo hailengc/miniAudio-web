@@ -42,14 +42,21 @@
 }
 
 .progress-bar .bar {
-  height: 5px;
-  width: 80%;
+  position: relative;
+  height: 3px;
+  width: 90%;
+  cursor: pointer;
   background-color: grey;
 }
 
 .progress-bar .brick {
+  position: absolute;
+  left: 0px;
+  /* opacity: 0.5; */
   width: 10px;
-  height: 20px;
-  background-color: skyblue;
+  height: 10px;
+  border-radius: 50%;
+  border: 5px solid skyblue;
+  background-color: white;
   cursor: pointer;
 }
